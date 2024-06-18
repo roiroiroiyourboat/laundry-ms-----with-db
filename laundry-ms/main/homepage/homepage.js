@@ -187,70 +187,140 @@ document.getElementById('btnCancel_service_details').addEventListener('click', f
     });
 });
 
-
-//PRINT INVOICE
-
 /***************************LAUNDRY SERVICE REQUEST****************************/
+//fetching laundry service
+function fetchServices() {
+    fetch('/laundry-ms/main/homepage/home_configs/fetch_laundry_service.php')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log(data); // Debugging
+            let dropdown = document.getElementById('service');
+            dropdown.innerHTML = '<option selected>--Select Service--</option>'; // Clear existing options
+            data.forEach(services => {
+                let option = document.createElement('option');
+                option.value = services;
+                option.textContent = services;
+                dropdown.appendChild(option);
+            });
+        })
+        .catch(error => console.error('Error fetching services:', error));
+}
+document.addEventListener('DOMContentLoaded', fetchServices);
+
+//fetching laundry category
+function fetchCategories() {
+    fetch('/laundry-ms/main/homepage/home_configs/fetchLaundryCateg.php')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log(data); // Debugging
+            let dropdown = document.getElementById('category');
+            dropdown.innerHTML = '<option selected>--Select Category--</option>'; //clear existing options
+            data.forEach(category => {
+                let option = document.createElement('option');
+                option.value = category;
+                option.textContent = category;
+                dropdown.appendChild(option);
+            });
+        })
+        .catch(error => console.error('Error fetching categories:', error));
+}
+//fetch categories when the page loads
+document.addEventListener('DOMContentLoaded', fetchCategories);
+
+//collects user input and submit data through database
 $(document).ready(function() {
     $('#form_id').submit(function(event) {
-        event.preventDefault(); //Prevent default form submission
-        
-        //AJAX request to save order to the database
+        event.preventDefault();
+    
+        var customerName = $('#customer_name').val();
+        var contactNumber = $('#contact_number').val();
+    
+        //Validate if the customer name or conact number already exists
         $.ajax({
             type: 'POST',
-            url: 'laundryService_config.php',
-            data: $(this).serialize(),
+            url: '/laundry-ms/main/homepage/home_configs/validate_customer.php',
+            data: { 
+                customer_name: customerName, 
+                contact_number: contactNumber 
+            },
             success: function(response) {
-                // Show SweetAlert upon successful insertion
-                swal.fire("Order added successfully!", "Your laundry service request has been added to the list.", "success")
-                .then((result) => {
-                    if (result.isConfirmed) {
-                        
-                        var customerName = $('#customer_name').val();
-                        $('#customer_name_display').text(customerName);
-
-                        var contactNumber = $('#contact_number').val();
-                        $('#contact_number_display').text(contactNumber);
-
-                        //Append order details to service overview section
-                        var orderDetails = '<tr>' +
-                        '<td>' + $('select[name="quantity"]').val() + '</td>' +
-                        '<td>' + $('select[name="service"]').val() + '</td>' +
-                        '<td>' + $('select[name="category"]').val() + '</td>' +
-                        '<td>' + $('#weight').val() + '</td>' +
-                        '<td>' + $('#category_rate').val() + '</td>' +
-                        '<td>' + $('#price').val() + '</td>' +
-                        '</tr>';
-                    $('#service_overview tbody').append(orderDetails);
-                        
-                        //clear form
-                        $('#form_id')[0].reset();
-                    }
-                });
+                if (response.status === 'error') {
+                    swal.fire("Validation Failed!", response.message, "error");
+                } else {
+                    // if customer name and contact number is available, proceed with form submission
+                    $.ajax({
+                        type: 'POST',
+                        url: 'laundryService_config.php',
+                        data: $('#form_id').serialize(),
+                        success: function(response) {
+                            if (response.status === 'success') {
+                                swal.fire("Order added successfully!", response.message, "success")
+                                .then((result) => {
+                                    if (result.isConfirmed) {
+                                        $('#customer_id_display').text(response.customer_id);
+                                        $('#customer_name_display').text(customerName);
+                                        $('#contact_number_display').text(contactNumber);
+    
+                                        var orderDetails = '<tr>' +
+                                            '<td>' + $('select[name="quantity"]').val() + '</td>' +
+                                            '<td>' + $('select[name="service"]').val() + '</td>' +
+                                            '<td>' + $('select[name="category"]').val() + '</td>' +
+                                            '<td>' + $('#weight').val() + '</td>' +
+                                            '<td>' + $('#price').val() + '</td>' +
+                                            '</tr>';
+                                        $('#service_overview tbody').append(orderDetails);
+    
+                                        // Clear form
+                                        $('#form_id')[0].reset();
+                                    }
+                                });
+                            } else {
+                                swal.fire("Order submission failed!", response.message, "error");
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            console.error("Status: " + status);
+                            console.error("Error: " + error);
+                            console.error("Response: " + xhr.responseText);
+    
+                            swal.fire("Order submission failed!", "An error occurred while submitting your order. Please try again.", "error");
+                        }
+                    });
+                }
             },
             error: function(xhr, status, error) {
-                // Log the error details to the console
                 console.error("Status: " + status);
                 console.error("Error: " + error);
                 console.error("Response: " + xhr.responseText);
-
-                // Display a SweetAlert with error details
-                swal.fire("Order submission failed!", "An error occurred while submitting your order. Please try again.", "error");
+    
+                swal.fire("Validation failed!", "An error occurred while validating the customer name. Please try again.", "error");
             }
         });
     });
+    
 
-    // Handle "Done" button click
+
+    //"Done" button click
     $('#doneButton').click(function() {
-        // Hide service form and show service overview section
+        //hide service form and show service overview section
         $('#service_form').hide();
         $('#service_overview').show();
     });
 
     $('#btnCancel_service').click(function() {
         swal.fire({
-            title: 'Are you sure?',
-            text: 'Do you want to cancel your service request?',
+            title: 'Cancel Service Request?',
+            text: 'Are you sure do you want to cancel your service request?',
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#3085d6',
@@ -271,7 +341,8 @@ $(document).ready(function() {
                             swal.fire("Order canceled successfully!", response.message, "success")
                             .then((result) => {
                                 if (result.isConfirmed) {
-                                    // Clear the service overview table and hide the section
+                                    //clear the service overview table and hide the section
+                                    $('#customer_id_display').text('');
                                     $('#service_overview tbody').empty();
                                     $('#customer_name_display').empty();
                                     $('#contact_number_display').empty();
@@ -295,5 +366,11 @@ $(document).ready(function() {
             }
         });
     });
+
+     // Calculate rate function
+    function calculateRate(weight) {
+        const ratePerKilo = 5; // Example rate per kilo
+        return (weight * ratePerKilo).toFixed(2);
+    }
 
 });

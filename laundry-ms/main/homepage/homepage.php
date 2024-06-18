@@ -98,11 +98,11 @@
                 
                 <div class="row">
                     <h4 class="text-center">Customer Details</h4>
-                    <h5 style="font-weight: 600; margin: 10px 0;">Customer No. : </h5>
+                    <!--<h5 style="font-weight: 600; margin: 10px 0;">Customer No. : <span id="customer_id_display"></h5>-->
                     <div class="col">
                         <label for="form-label"><b>Customer Name</b></label>
                         <input type="text" class="form-control" id="customer_name" name="customer_name"
-                            placeholder="Enter customer name" autocomplete="off" required>
+                            placeholder="Enter customer name" autocomplete="off">
                     </div>
 
                     <div class="col">
@@ -135,11 +135,11 @@
                 <div class="row">
                     <div class="col">
                         <label for="form-label"><b>Laundry Service</b></label>
-                        <select name="service" class="form-control">
+                        <select name="service" class="form-control" id="service">
                             <option selected>--Select Service--</option>
-                            <option value="Wash/Dry/Press">Wash/Dry/Fold</option>
+                            <!--<option value="Wash/Dry/Press">Wash/Dry/Fold</option>
                             <option value="Wash/Dry/Fold">Wash/Dry/Press</option>
-                            <option value="Dry only">Dry only</option>
+                            <option value="Dry only">Dry only</option>-->
                         </select>
                     </div>
                 </div>
@@ -149,19 +149,16 @@
                         <label for="form-label"><b>Laundry Category</b></label>
                         <select name="category" class="form-control" id="category">
                             <option selected>--Select Category--</option>
-                            <option value="Clothes, Table Napkin, Pillowcase">Clothes, Table Napkin, Pillowcase</option>
-                            <option value="Bedsheet/Table cloths/Curtain">Bedsheet/Table cloths/Curtain</option>
-                            <option value="Comforter, bath towel">Comforter, bath towel</option>
                         </select>
                     </div>
                 </div>
 
-                <div class="row">
+                <!--<div class="row">
                     <div class="col">
                         <label for="form-label"><b>Rate</b></label>
                         <input type="number" class="form-control" id="category_rate" name="category_rate" autocomplete="off">
                     </div>
-                </div>
+                </div>-->
 
                 <div class="row">
                     <div class="col">
@@ -201,7 +198,7 @@
                                 <h4>Customer Name: <?php echo $customer_name; ?></h4>
                                 <h4>Contact Number: <?php echo $contact_number; ?></h4>
                             </div>-->
-                    <h5 class="text-center">Customer No.: </h5>
+                    <h5 class="text-center">Customer No.: <span id="customer_id_display"></h5>
                     <div class="mb-4">
                         <div class="row">
                             <div class="col">
@@ -221,7 +218,7 @@
                                         <th>Service</th>
                                         <th>Category</th>
                                         <th>Weight (kg)</th>
-                                        <th>Rate (5/kilo)</th>
+                                        <!--<th>Rate (5/kilo)</th>-->
                                         <th>Price (₱)</th>
                                     </tr>
                                 </thead>
